@@ -60,8 +60,8 @@ all: main-build
 main-build: OV7670.elf secondary-outputs
 
 # Tool invocations
-OV7670.elf: $(OBJS) $(USER_OBJS) C:\Users\rfv84\Desktop\STMproject\OV7670\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "OV7670.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\rfv84\Desktop\STMproject\OV7670\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="OV7670.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+OV7670.elf: $(OBJS) $(USER_OBJS) C:\Users\rfv84\Desktop\STMproject\STM32F446\OV7670\STM32F446RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "OV7670.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\rfv84\Desktop\STMproject\STM32F446\OV7670\STM32F446RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="OV7670.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
