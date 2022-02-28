@@ -82,8 +82,8 @@ static void MX_DCMI_Init(void);
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-	uint16_t DevAddress_write = 0x42;
-	uint16_t DevAddress_read = 0x43;
+//	uint16_t DevAddress_write = 0x42;
+//	uint16_t DevAddress_read = 0x43;
 
 
 	uint8_t *data_write;
@@ -119,7 +119,7 @@ int main(void)
   MX_DMA_Init();
   MX_DCMI_Init();
   /* USER CODE BEGIN 2 */
-
+  OV7670_Init();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -148,7 +148,7 @@ int main(void)
 		*data_write = OV7670_MIDH;
 		HAL_I2C_Master_Transmit(&hi2c2, DevAddress_write, data_write, 2, HAL_MAX_DELAY);// Write regiter address
 		HAL_I2C_Master_Receive(&hi2c2, DevAddress_read, data_read, 2, HAL_MAX_DELAY);// Receive from that register(Use data_read to catch info)
-		printf("The manufacturer ID: %d", *data_read);
+		printf("The manufacturer IDDD: %d", *data_read);
 		*data_write = OV7670_MIDL;
 		HAL_I2C_Master_Transmit(&hi2c2, DevAddress_write, data_write, 2, HAL_MAX_DELAY);// Write regiter address
 		HAL_I2C_Master_Receive(&hi2c2, DevAddress_read, data_read, 2, HAL_MAX_DELAY);// Receive from that register(Use data_read to catch info)
@@ -158,7 +158,7 @@ int main(void)
 		*data_write = OV7670_PID;
 		HAL_I2C_Master_Transmit(&hi2c2, DevAddress_write, data_write, 2, HAL_MAX_DELAY);// Write regiter address
 		HAL_I2C_Master_Receive(&hi2c2, DevAddress_read, data_read, 2, HAL_MAX_DELAY);// Receive from that register(Use data_read to catch info)
-		printf("The Product ID Number: %d", *data_read);
+		printf("The Product IDDD Number: %d", *data_read);
 		*data_write = OV7670_VER;
 		HAL_I2C_Master_Transmit(&hi2c2, DevAddress_write, data_write, 2, HAL_MAX_DELAY);// Write regiter address
 		HAL_I2C_Master_Receive(&hi2c2, DevAddress_read, data_read, 2, HAL_MAX_DELAY);// Receive from that register(Use data_read to catch info)
