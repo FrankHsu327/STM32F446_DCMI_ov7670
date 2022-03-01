@@ -8,7 +8,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "ov7670.h"
 
+/* HandleTypedef */
 I2C_HandleTypeDef i2c;
+DCMI_HandleTypeDef OV7670_hdcmi_eval;
+
 
 const uint8_t OV7670_reg[OV7670_REG_NUM][2] =
 {
@@ -147,3 +150,9 @@ bool OV7670_Init(void)
     free(data);
 	return true;
 }
+
+//void DCMI_DMA_init(void)
+//{
+//	GPIO_InitTypeDef GPIO_InitStruct;
+//
+//}

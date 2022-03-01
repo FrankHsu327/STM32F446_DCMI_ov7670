@@ -40,6 +40,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+void DCMI_DMA_LINK(DCMI_HandleTypeDef *_hdcmi);
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,7 +57,7 @@ I2C_HandleTypeDef hi2c2;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-
+DCMI_HandleTypeDef *_hdcmi;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -119,7 +120,9 @@ int main(void)
   MX_DMA_Init();
   MX_DCMI_Init();
   /* USER CODE BEGIN 2 */
+  _hdcmi = &hdcmi;
   OV7670_Init();
+  DCMI_DMA_LINK(_hdcmi);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -148,7 +151,7 @@ int main(void)
 		*data_write = OV7670_MIDH;
 		HAL_I2C_Master_Transmit(&hi2c2, DevAddress_write, data_write, 2, HAL_MAX_DELAY);// Write regiter address
 		HAL_I2C_Master_Receive(&hi2c2, DevAddress_read, data_read, 2, HAL_MAX_DELAY);// Receive from that register(Use data_read to catch info)
-		printf("The manufacturer IDDD: %d", *data_read);
+		printf("The manufacturer IDDDDD: %d", *data_read);
 		*data_write = OV7670_MIDL;
 		HAL_I2C_Master_Transmit(&hi2c2, DevAddress_write, data_write, 2, HAL_MAX_DELAY);// Write regiter address
 		HAL_I2C_Master_Receive(&hi2c2, DevAddress_read, data_read, 2, HAL_MAX_DELAY);// Receive from that register(Use data_read to catch info)
@@ -223,6 +226,7 @@ static void MX_DCMI_Init(void)
 {
 
   /* USER CODE BEGIN DCMI_Init 0 */
+  __HAL_RCC_DCMI_CLK_ENABLE();
 
   /* USER CODE END DCMI_Init 0 */
 
@@ -329,7 +333,7 @@ static void MX_DMA_Init(void)
 
   /* DMA interrupt init */
   /* DMA2_Stream1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
 
 }
@@ -382,6 +386,11 @@ PUTCHAR_PROTOTYPE
   HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
 
   return ch;
+}
+
+void DCMI_DMA_LINK(DCMI_HandleTypeDef *hdcmi)
+{
+	__HAL_LINKDMA(hdcmi, DMA_Handle, hdma_dcmi);
 }
 /* USER CODE END 4 */
 

@@ -21,6 +21,9 @@
 #define OV7670_REG_NUM 122
 #define DevAddress_write 0x42
 #define DevAddress_read 0x43
+
+
 bool OV7670_Init(void);
+//void DCMI_DMA_init(void);
 
 #endif /* INC_OV7670_H_ */
