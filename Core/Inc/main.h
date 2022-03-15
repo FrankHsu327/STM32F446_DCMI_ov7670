@@ -68,6 +68,7 @@ void Error_Handler(void);
 #define I2C2_SDA_GPIO_Port GPIOC
 /* USER CODE BEGIN Private defines */
 
+#define FRAME_BUFFER 0xC0000000
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

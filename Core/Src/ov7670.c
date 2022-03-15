@@ -43,7 +43,7 @@ const uint8_t OV7670_reg[OV7670_REG_NUM][2] =
 	 * Image format
 	 *
 	 * */
-	{ 0x12, 0x8}, /* 0x14 = QVGA size, RGB mode; 0x8 = QCIF, YUV, 0xc = QCIF (RGB) */
+	{ 0x12, 0x14}, /* 0x14 = QVGA size, RGB mode; 0x8 = QCIF, YUV, 0xc = QCIF (RGB) */
 	{ 0x40, 0xd0},		/* COM15:
 	                           Bit[7:6]: Data formatRGB565*/
 	{ 0xb0, 0x84},		//Color mode
@@ -134,23 +134,29 @@ const uint8_t OV7670_reg[OV7670_REG_NUM][2] =
 
 };
 
-bool OV7670_Init(void)
+void OV7670_Init(void)
 {
+	OV7670_RESET();
+	HAL_Delay(1000);
     uint8_t *data;
     HAL_StatusTypeDef result;
     data = malloc(sizeof(uint8_t));
     if (!data)
-    	return false;
+    	return;
     for (int i = 0; i < OV7670_REG_NUM; i++){
     	*data = OV7670_reg[i][1];
     	result = HAL_I2C_Master_Transmit(&i2c, DevAddress_write, data, 2, HAL_MAX_DELAY); /* Write regiter address */
     	if (result == HAL_ERROR)
-    		return false;
+    		return;
     }
     free(data);
-	return true;
+
 }
 
+void OV7670_RESET(void)
+{
+
+}
 //void DCMI_DMA_init(void)
 //{
 //	GPIO_InitTypeDef GPIO_InitStruct;

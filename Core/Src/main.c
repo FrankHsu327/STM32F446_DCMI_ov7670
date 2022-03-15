@@ -40,7 +40,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-void DCMI_DMA_LINK(DCMI_HandleTypeDef *_hdcmi);
+#define QVGA 320*240
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -55,9 +56,14 @@ DMA_HandleTypeDef hdma_dcmi;
 I2C_HandleTypeDef hi2c2;
 
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart2_tx;
+DMA_HandleTypeDef hdma_usart2_rx;
 
 /* USER CODE BEGIN PV */
-DCMI_HandleTypeDef *_hdcmi;
+
+/* Image size */
+static uint32_t frameBuffer[QVGA];
+uint32_t picSize = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -86,15 +92,6 @@ int main(void)
 //	uint16_t DevAddress_write = 0x42;
 //	uint16_t DevAddress_read = 0x43;
 
-
-	uint8_t *data_write;
-    uint8_t *data_read;
-
-	bool latch = false;
-	data_write = (uint8_t*)malloc(sizeof(uint8_t));
-	data_read = (uint8_t*)malloc(sizeof(uint8_t));
-	*data_write = 0x00;
-	*data_read = 0x00;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -120,9 +117,10 @@ int main(void)
   MX_DMA_Init();
   MX_DCMI_Init();
   /* USER CODE BEGIN 2 */
-  _hdcmi = &hdcmi;
   OV7670_Init();
-  DCMI_DMA_LINK(_hdcmi);
+  HAL_Delay(1000);  //Delay for the camera to output correct data
+  Im_size =  0x9600;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -134,39 +132,30 @@ int main(void)
     /* USER CODE BEGIN 3 */
 	/* I2C code (SCCB) */
 	if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_RESET){
-		while (1){
-			if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == 1){
-				latch = true;
-				break;
-			}
-		}
+		__HAL_DCMI_ENABLE_IT(&hdcmi, DCMI_IT_FRAME);
+		memset((void *)frameBuffer, 0, sizeof(frameBuffer));// reset buffer
+		HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t) FRAME_BUFFER, QVGA);// Start DCMI, will start DMA interrupt inside this function.
 	}
-	if (latch){
-		latch = false;
-
-		/* SCCB */
-		/* SCCB is an i2c-like protocal */
-
-		/* Read manufacturer ID (High and Low) */
-		*data_write = OV7670_MIDH;
-		HAL_I2C_Master_Transmit(&hi2c2, DevAddress_write, data_write, 2, HAL_MAX_DELAY);// Write regiter address
-		HAL_I2C_Master_Receive(&hi2c2, DevAddress_read, data_read, 2, HAL_MAX_DELAY);// Receive from that register(Use data_read to catch info)
-		printf("The manufacturer IDDDDD: %d", *data_read);
-		*data_write = OV7670_MIDL;
-		HAL_I2C_Master_Transmit(&hi2c2, DevAddress_write, data_write, 2, HAL_MAX_DELAY);// Write regiter address
-		HAL_I2C_Master_Receive(&hi2c2, DevAddress_read, data_read, 2, HAL_MAX_DELAY);// Receive from that register(Use data_read to catch info)
-		printf("%d\r\n", *data_read);
-
-		/* Read product ID Number(MSB and LSB) */
-		*data_write = OV7670_PID;
-		HAL_I2C_Master_Transmit(&hi2c2, DevAddress_write, data_write, 2, HAL_MAX_DELAY);// Write regiter address
-		HAL_I2C_Master_Receive(&hi2c2, DevAddress_read, data_read, 2, HAL_MAX_DELAY);// Receive from that register(Use data_read to catch info)
-		printf("The Product IDDD Number: %d", *data_read);
-		*data_write = OV7670_VER;
-		HAL_I2C_Master_Transmit(&hi2c2, DevAddress_write, data_write, 2, HAL_MAX_DELAY);// Write regiter address
-		HAL_I2C_Master_Receive(&hi2c2, DevAddress_read, data_read, 2, HAL_MAX_DELAY);// Receive from that register(Use data_read to catch info)
-		printf("%d\r\n", *data_read);
-	}
+//	if (latch){
+//		latch = false;
+//		HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_SNAPSHOT, (uint32_t) FRAME_BUFFER, Im_size);
+//		printf("Capture one photo\n");
+//		/* SCCB */
+//		/* SCCB is an i2c-like protocal */
+//
+//		/* Read manufacturer ID (High and Low) */
+////		*data_write = OV7670_MIDH;
+////		HAL_I2C_Master_Transmit(&hi2c2, DevAddress_write, data_write, 2, HAL_MAX_DELAY);// Write regiter address
+////		HAL_I2C_Master_Receive(&hi2c2, DevAddress_read, data_read, 2, HAL_MAX_DELAY);// Receive from that register(Use data_read to catch info)
+////		printf("The manufacturer IDDDDD: %d", *data_read);
+////		*data_write = OV7670_MIDL;
+////		HAL_I2C_Master_Transmit(&hi2c2, DevAddress_write, data_write, 2, HAL_MAX_DELAY);// Write regiter address
+////		HAL_I2C_Master_Receive(&hi2c2, DevAddress_read, data_read, 2, HAL_MAX_DELAY);// Receive from that register(Use data_read to catch info)
+////		printf("%d\r\n", *data_read);
+////
+//
+//
+//	}
   }
   /* USER CODE END 3 */
 }
@@ -330,8 +319,15 @@ static void MX_DMA_Init(void)
 
   /* DMA controller clock enable */
   __HAL_RCC_DMA2_CLK_ENABLE();
+  __HAL_RCC_DMA1_CLK_ENABLE();
 
   /* DMA interrupt init */
+  /* DMA1_Stream5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream5_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream5_IRQn);
+  /* DMA1_Stream6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
   /* DMA2_Stream1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA2_Stream1_IRQn, 5, 0);
   HAL_NVIC_EnableIRQ(DMA2_Stream1_IRQn);
@@ -388,10 +384,7 @@ PUTCHAR_PROTOTYPE
   return ch;
 }
 
-void DCMI_DMA_LINK(DCMI_HandleTypeDef *hdcmi)
-{
-	__HAL_LINKDMA(hdcmi, DMA_Handle, hdma_dcmi);
-}
+
 /* USER CODE END 4 */
 
 /**

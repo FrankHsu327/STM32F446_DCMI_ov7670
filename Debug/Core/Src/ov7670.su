@@ -1,1 +1,2 @@
 ov7670.c:137:6:OV7670_Init	32	static
+ov7670.c:156:6:OV7670_RESET	4	static

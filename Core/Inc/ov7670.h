@@ -23,7 +23,8 @@
 #define DevAddress_read 0x43
 
 
-bool OV7670_Init(void);
+void OV7670_Init(void);
+void OV7670_RESET(void);
 //void DCMI_DMA_init(void);
 
 #endif /* INC_OV7670_H_ */
